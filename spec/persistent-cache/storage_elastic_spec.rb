@@ -24,7 +24,7 @@ describe Persistent::StorageElastic do
   end
 
   context "when asked to store a key value pair" do
-    it "should store the key/value pair in RAM, with the current time as timestamp" do
+    it "should store the key/value pair in Elasticsearch, with the current time as timestamp" do
       start_time = Time.now - 1
       @iut.save_key_value_pair((@test_key), (@test_value))
       result = @iut.lookup_key((@test_key))
@@ -34,7 +34,7 @@ describe Persistent::StorageElastic do
       expect(test_time).to be < start_time + 600
     end
 
-    it "should store the key/value pair in RAM, with a timestamp specified" do
+    it "should store the key/value pair in Elasticsearch, with a timestamp specified" do
       test_time = (Time.now - 2500)
       @iut.save_key_value_pair((@test_key), (@test_value), test_time)
       result = @iut.lookup_key((@test_key))
@@ -53,13 +53,13 @@ describe Persistent::StorageElastic do
   end
 
   context "When looking up a value given its key" do
-    it "should retrieve the value from RAM" do
+    it "should retrieve the value from Elasticsearch" do
       @iut.save_key_value_pair((@test_key), (@test_value))
       result = @iut.lookup_key((@test_key))
       expect(result[:value]).to eql((@test_value))
     end
 
-    it "should retrieve the timestamp when the value was stored from RAM" do
+    it "should retrieve the timestamp when the value was stored from Elasticsearch" do
       timestamp = Time.now.to_s
       @iut.save_key_value_pair((@test_key), (@test_value), timestamp)
       sleep 1
@@ -89,8 +89,8 @@ describe Persistent::StorageElastic do
     end
   end
 
-  context "when asked the size of the RAM database" do
-    it "should return 0 if the RAM database has no entries" do
+  context "when asked the size of the Elasticsearch database" do
+    it "should return 0 if the Elasticsearch database has no entries" do
       expect(@iut.size).to eql(0)
     end
 
@@ -101,12 +101,12 @@ describe Persistent::StorageElastic do
     end
   end
 
-  context "when asked for the keys in the RAM database" do
-    it "should return an empty array if there are no entries in the RAM database" do
+  context "when asked for the keys in the Elasticsearch database" do
+    it "should return an empty array if there are no entries in the Elasticsearch database" do
       expect(@iut.keys).to eql([])
     end
 
-    it "should return the keys in the RAM database" do
+    it "should return the keys in the Elasticsearch database" do
       populate_database(@iut)
       keys = @iut.keys.flatten
       expect(keys.include?(("one"))).to eql(true)
@@ -125,8 +125,8 @@ describe Persistent::StorageElastic do
     end
   end
 
-  context "when asked to clear the RAM database" do
-    it "should delete all entries in RAM" do
+  context "when asked to clear the Elasticsearch database" do
+    it "should delete all entries in Elasticsearch" do
       populate_database(@iut)
       @iut.clear
       expect(@iut.size).to eql(0)
