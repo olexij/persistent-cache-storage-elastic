@@ -20,7 +20,7 @@ Or install it yourself as:
 
 ## Usage
 
-TBD
+Updates to the cache are stored in a Elasticsearch database.
 
 Tell Persistent::Cache to use this provider so:
 
@@ -39,7 +39,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/evangraan/persistent-cache-storage-elastic. This gem was sponsored by Hetzner (Pty) Ltd - http://hetzner.co.za
+Bug reports and pull requests are welcome on GitHub at https://github.com/evangraan/persistent-cache-storage-elastic. This gem was sponsored by Advantest Europe GmbH https://www.advantest.com/
 
 ## License
 

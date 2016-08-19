@@ -1,5 +1,7 @@
 # coding: utf-8
-
+gem 'net-http-persistent'
+gem 'elasticsearch'
+gem 'json'
 
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
@@ -8,8 +10,8 @@ require 'persistent-cache/version'
 Gem::Specification.new do |spec|
   spec.name          = "persistent-cache-storage-elastic"
   spec.version       = Persistent::Storage::Elastic::VERSION
-  spec.authors       = ["Ernst Van Graan"]
-  spec.email         = ["ernst.van.graan@hetzner.co.za"]
+  spec.authors       = ["Ernst Van Graan", "Olexij Tkatchenko"]
+  spec.email         = ["ernst.van.graan@hetzner.co.za", "olexij.tkatchenko@advantest.com"]
 
   spec.summary       = %q{Provides an elastic search storage back-end to Persistent::Cache}
   spec.description   = %q{Provides an elastic search storage back-end to Persistent::Cache}
