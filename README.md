@@ -20,16 +20,23 @@ Or install it yourself as:
 
 ## Usage
 
-TBD
+Updates to the cache are stored in a Elasticsearch database.
 
 Tell Persistent::Cache to use this provider so:
 
     require 'persistent-cache/storage_elastic'
-    require 'persistent-cache'
 
-    storage_details = { 'tbd' => 'to be provided' }
-    freshness = nil # forever or freshness in seconds
-    cache = Persistent::Cache.new(storage_location, freshness, Persistent::Cache::STORAGE_ELASTIC)
+
+    storage_details = {
+                                  host: 'http://localhost:9200/',
+                                  transport_options: {
+                                      request: {timeout: 5}
+                                  },
+                                  index: 'persistent_cache',
+                                  type:'entry'
+                               }
+
+    cache = Persistent::StorageElastic.new(storage_details)
 
 ## Development
 
@@ -39,7 +46,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/evangraan/persistent-cache-storage-elastic. This gem was sponsored by Hetzner (Pty) Ltd - http://hetzner.co.za
+Bug reports and pull requests are welcome on GitHub at https://github.com/evangraan/persistent-cache-storage-elastic. This gem was sponsored by Advantest Europe GmbH https://www.advantest.com/
 
 ## License
 
