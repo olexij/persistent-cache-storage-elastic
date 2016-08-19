@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Ernst Van Graan", "Olexij Tkatchenko"]
   spec.email         = ["ernst.van.graan@hetzner.co.za", "olexij.tkatchenko@advantest.com"]
 
-  spec.summary       = %q{Provides a SQLite storage back-end to Persistent::Cache}
-  spec.description   = %q{Provides a SQLite storage back-end to Persistent::Cache}
+  spec.summary       = %q{Provides a Elasticsearch storage back-end to Persistent::Cache}
+  spec.description   = %q{Provides a Elasticsearch storage back-end to Persistent::Cache}
   spec.homepage      = "https://github.com/evangraan/persistent-cache-storage-elastic"
   spec.license       = "MIT"
 
@@ -19,14 +19,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.3"
-  spec.add_development_dependency "rake"
-  spec.add_development_dependency "rspec"
-  spec.add_development_dependency 'coveralls'
-  spec.add_development_dependency 'byebug'
-  spec.add_dependency 'sqlite3', '1.3.10'
   spec.add_dependency "persistent-cache-storage-api"
-  spec.add_dependency 'eh'
-  spec.add_dependency "elasticsearch", "~> 1.0.13"
+  spec.add_dependency "elasticsearch"
   spec.add_dependency "elasticsearch-api"
 end
