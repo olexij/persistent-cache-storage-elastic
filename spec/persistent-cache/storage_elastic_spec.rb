@@ -70,7 +70,7 @@ describe Persistent::StorageElastic do
     it "should return an empty array if a key is not in storage" do
       @iut.delete_entry((@test_key))
       result = @iut.lookup_key((@test_key))
-      expect(result).to eql([])
+      expect(result).to eql({})
     end
   end
 
@@ -85,7 +85,7 @@ describe Persistent::StorageElastic do
       expect(result[:value]).to eql((@test_value))
       @iut.delete_entry((@test_key))
       result = @iut.lookup_key((@test_key))
-      expect(result).to eql([])
+      expect(result).to eql({})
     end
   end
 

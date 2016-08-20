@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.add_dependency 'eh'
   spec.add_dependency "persistent-cache-storage-api"
   spec.add_dependency "elasticsearch"
   spec.add_dependency "elasticsearch-api"

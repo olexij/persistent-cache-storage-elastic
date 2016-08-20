@@ -45,7 +45,7 @@ module Persistent
           {value: result['_source']['value'],  timestamp: result['_source']['timestamp']}
         end
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
-        []
+        {}
       end
     end
 
