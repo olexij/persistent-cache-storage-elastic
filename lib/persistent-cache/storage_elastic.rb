@@ -2,6 +2,7 @@ require 'net/http'
 require "persistent-cache/version"
 require "persistent-cache/storage_api"
 require 'eh/eh'
+require 'base64'
 
 require 'elasticsearch'
 require 'elasticsearch-api'
@@ -10,8 +11,12 @@ module Persistent
   class StorageElastic < Persistent::Storage::API
     attr_accessor :storage_details
     attr_accessor :storage
+    attr_accessor :encode_value_base64
 
-    def initialize(storage_details = nil)
+    def initialize(storage_details = nil, encode_value_base64 = true)
+      # encode the value to avoid paarsing errors in Elasticsearch. Do not encode it if there will be no problems with special characters (see Elasticsearch documentation)
+      @encode_value_base64 =encode_value_base64
+
       @storage_details = {
           host: 'http://localhost:9200/',
           transport_options: {
@@ -24,7 +29,8 @@ module Persistent
       @storage_details.merge!(storage_details)  if storage_details
       @storage = Elasticsearch::Client.new(@storage_details)
 
-      begin # set the type of value to binary, do ti will be not parsed
+      if @encode_value_base64 # set the type of value to binary, do ti will be not parsed
+      begin
         uri = URI( "#{@storage_details[:host]}/#{@storage_details[:index]}")
         http = Net::HTTP.new(uri.host, uri.port)
         req = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
@@ -32,6 +38,7 @@ module Persistent
         http.request(req)
       rescue => e
         puts "failed #{e}"
+      end
       end
     end
 
@@ -44,7 +51,8 @@ module Persistent
       delete_entry(key)
       time_entry = timestamp.nil? ? Time.now.to_s : timestamp.to_s
       EH::retry!(:args => [key, value, time_entry]) do
-        @storage.create index: @storage_details[:index], type: @storage_details[:type], id: key.to_s, body: { value: value, timestamp: time_entry}
+        value = Base64.encode64(value) if @encode_value_base64
+        @storage.create index: @storage_details[:index], type: @storage_details[:type], id: key.to_s, body: { value:  value, timestamp: time_entry}
       end
     end
 
@@ -52,7 +60,9 @@ module Persistent
       begin
         EH::retry!(:args => [key]) do
           result = @storage.get index: @storage_details[:index], type: @storage_details[:type], id: key.to_s
-          {value: result['_source']['value'],  timestamp: result['_source']['timestamp']}
+          value = result['_source']['value']
+          value = Base64.decode64(result['_source']['value'])  if @encode_value_base64
+          {value:  value,  timestamp: result['_source']['timestamp']}
         end
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         {}
