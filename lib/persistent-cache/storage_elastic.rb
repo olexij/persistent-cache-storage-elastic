@@ -1,3 +1,4 @@
+require 'net/http'
 require "persistent-cache/version"
 require "persistent-cache/storage_api"
 require 'eh/eh'
@@ -22,6 +23,16 @@ module Persistent
 
       @storage_details.merge!(storage_details)  if storage_details
       @storage = Elasticsearch::Client.new(@storage_details)
+
+      begin # set the type of value to binary, do ti will be not parsed
+        uri = URI( "#{@storage_details[:host]}/#{@storage_details[:index]}")
+        http = Net::HTTP.new(uri.host, uri.port)
+        req = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
+        req.body = '{"mappings": { "#{@storage_details[:type]}"": { "properties": { "value": { "type": "binary"},  "timestamp": {"type": "string" } } } } }'
+        http.request(req)
+      rescue => e
+        puts "failed #{e}"
+      end
     end
 
     def is_elastic_available
@@ -33,7 +44,6 @@ module Persistent
       delete_entry(key)
       time_entry = timestamp.nil? ? Time.now.to_s : timestamp.to_s
       EH::retry!(:args => [key, value, time_entry]) do
-        #@storage[key] = {:value => value, :timestamp => time_entry}
         @storage.create index: @storage_details[:index], type: @storage_details[:type], id: key.to_s, body: { value: value, timestamp: time_entry}
       end
     end
