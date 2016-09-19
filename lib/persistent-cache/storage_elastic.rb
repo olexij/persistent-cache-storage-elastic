@@ -22,6 +22,9 @@ module Persistent
           transport_options: {
               request: {timeout: 5}
           },
+          eh_options: {
+             threshold: 1
+          },
           index: 'persistent_cache',
           type:'entry'
       }
@@ -50,7 +53,7 @@ module Persistent
     def save_key_value_pair(key, value, timestamp = nil)
       delete_entry(key)
       time_entry = timestamp.nil? ? Time.now.to_s : timestamp.to_s
-      EH::retry!(:args => [key, value, time_entry]) do
+      EH::retry!(:args => [key, value, time_entry], :opts => @storage_details[:eh_options]) do
         value = Base64.encode64(value) if @encode_value_base64
         @storage.create index: @storage_details[:index], type: @storage_details[:type], id: key.to_s, body: { value:  value, timestamp: time_entry}
       end
@@ -58,7 +61,7 @@ module Persistent
 
     def lookup_key(key)
       begin
-        EH::retry!(:args => [key]) do
+        EH::retry!(:args => [key], :opts => @storage_details[:eh_options]) do
           result = @storage.get index: @storage_details[:index], type: @storage_details[:type], id: key.to_s
           value = result['_source']['value']
           value = Base64.decode64(result['_source']['value'])  if @encode_value_base64
@@ -71,7 +74,7 @@ module Persistent
 
     def delete_entry(key)
       begin
-        EH::retry!(:args => [key]) do
+        EH::retry!(:args => [key], :opts => @storage_details[:eh_options]) do
           @storage.delete index: @storage_details[:index], type: @storage_details[:type], id: key.to_s
         end
       rescue   Elasticsearch::Transport::Transport::Errors::NotFound
@@ -87,7 +90,7 @@ module Persistent
 
     def keys
       keys = []
-      EH::retry!(:args => []) do
+      EH::retry!(:args => [], :opts => @storage_details[:eh_options]) do
         response = @storage.search index:  @storage_details[:index], search_type: 'scan', scroll: '5m', size: 10
         # Call `scroll` until results are empty
         while response = @storage.scroll(scroll_id: response['_scroll_id'], scroll: '5m') and not response['hits']['hits'].empty? do
@@ -98,7 +101,7 @@ module Persistent
     end
 
     def clear
-      EH::retry!(:args => []) do
+      EH::retry!(:args => [], :opts => @storage_details[:eh_options]) do
         @storage.indices.delete index: @storage_details[:index] rescue nil
         @storage.indices.create index: @storage_details[:index]
       end

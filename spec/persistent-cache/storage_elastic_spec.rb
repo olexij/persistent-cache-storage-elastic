@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'time'
 require 'elasticsearch'
+require 'base64'
 
 describe Persistent::StorageElastic do
   before :each do
@@ -50,6 +51,24 @@ describe Persistent::StorageElastic do
       result = @iut.lookup_key((@test_key))
       expect(result[:value]).to eql(("testvalue2"))
     end
+
+    it "should write base64 encoded value when asked" do
+      base64_encoded_storage = Persistent::StorageElastic.new(nil, true)
+      base64_encoded_storage.clear
+
+      value = 'bar'
+      base64_encoded_value =Base64.encode64(value)
+
+      base64_encoded_storage.save_key_value_pair('foo', value)
+
+      # read encoded value as plain text
+      plain_storage = Persistent::StorageElastic.new(nil, false)
+
+      result = plain_storage.lookup_key('foo')
+
+      expect(result[:value]).to eql(base64_encoded_value)
+    end
+
   end
 
   context "When looking up a value given its key" do
