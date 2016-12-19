@@ -3,7 +3,7 @@ require "persistent-cache/version"
 require "persistent-cache/storage_api"
 require 'eh/eh'
 require 'base64'
-
+require 'json'
 require 'elasticsearch'
 require 'elasticsearch-api'
 
@@ -54,8 +54,9 @@ module Persistent
       delete_entry(key)
       time_entry = timestamp.nil? ? Time.now.to_s : timestamp.to_s
       EH::retry!(:args => [key, value, time_entry], :opts => @storage_details[:eh_options]) do
-        value = Base64.encode64(value) if @encode_value_base64
-        @storage.create index: @storage_details[:index], type: @storage_details[:type], id: key.to_s, body: { value:  value, timestamp: time_entry}
+        json = value.to_json()
+        value = Base64.encode64(json) if @encode_value_base64
+        @storage.create index: @storage_details[:index], type: @storage_details[:type], id: key.to_s, body: { value:  json, timestamp: time_entry}
       end
     end
 
@@ -63,8 +64,9 @@ module Persistent
       begin
         EH::retry!(:args => [key], :opts => @storage_details[:eh_options]) do
           result = @storage.get index: @storage_details[:index], type: @storage_details[:type], id: key.to_s
-          value = result['_source']['value']
           value = Base64.decode64(result['_source']['value'])  if @encode_value_base64
+          json = result['_source']['value']
+          value = JSON::parse(json)
           {value:  value,  timestamp: result['_source']['timestamp']}
         end
       rescue Elasticsearch::Transport::Transport::Errors::NotFound

@@ -52,12 +52,11 @@ describe Persistent::StorageElastic do
       expect(result[:value]).to eql(("testvalue2"))
     end
 
-    it "should write base64 encoded value when asked" do
+    it "should write plain string value when asked" do
       base64_encoded_storage = Persistent::StorageElastic.new(nil, true)
       base64_encoded_storage.clear
 
       value = 'bar'
-      base64_encoded_value =Base64.encode64(value)
 
       base64_encoded_storage.save_key_value_pair('foo', value)
 
@@ -66,10 +65,50 @@ describe Persistent::StorageElastic do
 
       result = plain_storage.lookup_key('foo')
 
-      expect(result[:value]).to eql(base64_encoded_value)
+      expect(result[:value]).to eql(value)
     end
 
+    it "should write plain numeric value when asked" do
+      value = 1
+
+      # read encoded value as plain text
+      plain_storage = Persistent::StorageElastic.new(nil, false)
+      plain_storage.clear
+      plain_storage.save_key_value_pair('foo', value)
+
+      result = plain_storage.lookup_key('foo')
+
+      expect(result[:value]).to eql(value)
+    end
+    
+  it "should write base64 encoded string value when asked" do
+    base64_encoded_storage = Persistent::StorageElastic.new(nil, true)
+    base64_encoded_storage.clear
+
+    value = 'bar'
+
+    base64_encoded_storage.save_key_value_pair('foo', value)
+
+    # read encoded value as plain text
+    result = base64_encoded_storage.lookup_key('foo')
+
+    expect(result[:value]).to eql(value)
   end
+
+  it "should write  base64 encoded  numeric value when asked" do
+    value = 1
+
+    # read encoded value as plain text
+    base64_encoded_storage = Persistent::StorageElastic.new(nil, true)
+    base64_encoded_storage.clear
+    base64_encoded_storage.save_key_value_pair('foo', value)
+
+    result = base64_encoded_storage.lookup_key('foo')
+
+    expect(result[:value]).to eql(value)
+  end
+
+end
 
   context "When looking up a value given its key" do
     it "should retrieve the value from Elasticsearch" do

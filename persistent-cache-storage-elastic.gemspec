@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "rspec"
   spec.add_dependency 'eh'
+  spec.add_dependency 'json'
   spec.add_dependency 'net-http-persistent'
   spec.add_dependency "persistent-cache-storage-api"
   spec.add_dependency "elasticsearch"
